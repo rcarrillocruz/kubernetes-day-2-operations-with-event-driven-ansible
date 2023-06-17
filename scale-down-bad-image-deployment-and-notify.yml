@@ -1,0 +1,30 @@
+- hosts: localhost
+  connection: local
+
+  vars:
+    bad_image: "nginx:1.14.2"
+
+  tasks:
+    - name: Get Deployment object
+      kubernetes.core.k8s_info:
+        api_version: apps/v1
+        kind: Deployment
+        name: "{{ deployment_name }}"
+        namespace: default
+      register: _deployment 
+
+    - block:
+        - name: Scale down Deployment to zero replicas
+          kubernetes.core.k8s_scale:
+            api_version: apps/v1
+            kind: Deployment
+            name: "{{ deployment_name }}"
+            namespace: default
+            replicas: 0
+
+        - name: Notify slack a namespace has been created
+          community.general.slack:
+            token: "{{ token }}" 
+            msg: "Deployment with bad image {{ bad_image }} scaled down. Please do not use it"
+      when: _deployment.resources.0.spec.template.spec.containers.0.image == bad_image
+    
