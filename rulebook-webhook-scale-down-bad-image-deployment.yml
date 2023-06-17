@@ -1,0 +1,16 @@
+- name: Listen for newly added resources
+  hosts: all
+  sources:
+    - ansible.eda.webhook:
+        hosts: 0.0.0.0
+        port: 5000
+  rules:
+    - name: Scale down bad image deployment and notify to Slack
+      condition: event.payload.eventmeta.kind == 'Deployment' and event.payload.eventmeta.reason == 'Created'
+      action:
+        run_playbook: 
+          name: scale-down-bad-image-deployment-and-notify.yml
+          extra_vars:
+            token: "{{ slack_token }}"
+            deployment_name: "{{ event.payload.eventmeta.name }}"
+            k8s_api_token: "{{ k8s_api_token }}"

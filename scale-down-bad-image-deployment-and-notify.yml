@@ -11,6 +11,7 @@
         kind: Deployment
         name: "{{ deployment_name }}"
         namespace: default
+        api_key: "{{ k8s_api_token }}"
       register: _deployment 
 
     - block:
@@ -21,6 +22,7 @@
             name: "{{ deployment_name }}"
             namespace: default
             replicas: 0
+            api_key: "{{ k8s_api_token }}"
 
         - name: Notify slack a namespace has been created
           community.general.slack:
