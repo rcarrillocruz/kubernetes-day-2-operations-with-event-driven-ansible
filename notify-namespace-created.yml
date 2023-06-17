@@ -1,0 +1,8 @@
+- hosts: localhost
+  connection: local
+
+  tasks:
+    - name: Notify slack a namespace has been created
+      community.general.slack:
+        token: "{{ token }}" 
+        msg: "{{ msg }}"
